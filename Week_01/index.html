@@ -1,0 +1,160 @@
+
+<div id = "board"></div>
+<script>
+
+    let pattern = [
+        0,0,0,
+        0,0,0,
+        0,0,0
+    ], color = 1;
+
+    function show(){
+        let board = document.getElementById('board');
+        board.innerHTML = "";
+        for(let i =0 ; i < 3 ; i++){
+            for(let j =0 ; j < 3 ; j++){
+                let cell = document.createElement("div");
+                cell.classList.add('cell');
+                cell.innerHTML = pattern[i * 3 + j] == 2 ? "❌" :pattern[i * 3 + j]  == 1 ? "⭕️" :"";
+            
+                cell.addEventListener("click",() => move(j,i));
+                board.appendChild(cell);
+
+            }
+            board.appendChild(document.createElement("br"));
+        }
+    }
+    show();
+    console.log(bestChoice(pattern,color));
+
+    function move(x,y){
+        pattern[y * 3 + x] = color ;
+        if(check(pattern,color)){
+            alert(color == 2 ? "❌ is winner" : "⭕️ is winner")
+        }
+        color = 3 - color ;
+        console.log(bestChoice(pattern,color));
+        show();
+      
+        computerMove()
+    }
+    function clone(parrern){
+        return Object.create(parrern)
+    }
+
+    function willWin(pattern, color){
+        for(let i =0 ; i < 3 ; i++){
+            for(let j =0 ; j < 3 ; j++){
+                if(pattern[i * 3 + j] !== 0 ) continue ;
+                let temp = clone(pattern);
+                temp[i * 3 + j]  = color;
+                if(check(temp,color)) {
+                    return [j,i] 
+                } ;
+            }
+        }
+        return null
+
+    }
+    function computerMove(){
+        let choice = bestChoice(pattern,color);
+        if(choice.point){
+            pattern[choice.point[1] * 3 + choice.point[0]] = color ;
+        }
+        if(check(pattern,color)){
+            alert(color == 2 ? "❌ is winner" : "⭕️ is winner")
+        }
+        color = 3- color;
+        show();
+    }
+
+    function bestChoice(pattern,color){
+        let point  = willWin(pattern,color) ;
+        if(point){
+            return {
+                point:point,
+                result:1
+            }
+        }
+        let result = -1 ;
+        for(let i = 0; i< 3;i++){
+            for(let j =0 ; j < 3 ;j ++){
+                if(pattern[i * 3 + j] ) continue;
+                let temp = clone(pattern);
+                temp[i * 3 + j]  = color ;
+                let opp = bestChoice(temp,3-color);
+                if(-opp.result > result){
+                    result = -opp.result ;
+                    point =[j,i];
+                }
+            }
+           
+        }
+
+        return {
+            point:point,
+            result:point ? result : 0
+        }
+    }
+
+ 
+    function check(pattern, color){
+        for(let i =0 ; i < 3 ; i ++){
+            let win = true ;
+            for(let j =0 ; j < 3; j++){
+                if(pattern[i * 3 + j]  !== color){
+                    win = false
+                }
+            }
+            if(win) return true
+        }
+
+        for(let i =0 ; i < 3 ; i ++){
+            let win = true ;
+            for(let j =0 ; j < 3; j++){
+                if(pattern[j * 3 + i]  !== color){
+                    win = false
+                }
+            }
+            if(win) return true
+        }
+        {
+            let win  =true ;
+            for(let j =0 ; j < 3 ;j++){
+                if(pattern[j * 3 + j ] != color){
+                    win = false ;
+                }
+            }
+            if(win) return true
+
+        }
+        {
+            let win = true ;
+            for(let j = 0 ; j < 3 ; j++ ){
+                if(pattern[j * 3 + 2 - j] != color){
+                    win = false ;
+                }   
+            }
+            if(win) return true
+        }
+
+        return false
+     
+    }
+
+   
+</script>
+
+<style>
+    .cell{
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 100px;
+        text-align: center;
+        font-size: 50px;
+        border: 1px solid #fff;
+    }
+</style>
